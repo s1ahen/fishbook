@@ -826,37 +826,52 @@ function browseCardHTML(c, myStatus) {
   const fish = Array.isArray(c.target_fish) && c.target_fish.length > 0;
   const isTeam = c.comp_type === 'team';
   const scoringLabel = c.scoring==='weight'?'By Weight':c.scoring==='count'?'By Count':'By Value';
+  const scoringIcon  = c.scoring==='weight'?'weight-scale':c.scoring==='count'?'fish':'dollar-sign';
+
   let joinBtn;
-  if (myStatus === 'approved') joinBtn = `<button class="btn-browse-join joined" disabled><i class="fa-solid fa-check"></i> Joined</button>`;
-  else if (myStatus === 'pending') joinBtn = `<button class="btn-browse-join pending" disabled><i class="fa-solid fa-clock"></i> Pending</button>`;
-  else joinBtn = `<button class="btn-browse-join" onclick="browseJoin('${escHtml(c.id)}','${escHtml(c.name)}','${escHtml(c.join_approval)}',this)"><i class="fa-solid fa-door-open"></i> ${c.join_approval==='manual'?'Request to Join':'Join'}</button>`;
+  if (myStatus === 'approved')
+    joinBtn = `<button class="btn-browse-join joined" disabled><i class="fa-solid fa-check"></i> Joined</button>`;
+  else if (myStatus === 'pending')
+    joinBtn = `<button class="btn-browse-join pending" disabled><i class="fa-solid fa-clock"></i> Pending</button>`;
+  else
+    joinBtn = `<button class="btn-browse-join" onclick="browseJoin('${escHtml(c.id)}','${escHtml(c.name)}','${escHtml(c.join_approval)}',this)">
+      <i class="fa-solid fa-door-open"></i> ${c.join_approval==='manual'?'Request':'Join'}
+    </button>`;
 
   const bannerHTML = c.thumbnail_url
-    ? `<div class="browse-card-banner"><img src="${escHtml(c.thumbnail_url)}" alt="${escHtml(c.name)}"></div>`
-    : `<div class="browse-card-banner browse-card-banner-empty"><i class="fa-solid fa-flag"></i></div>`;
+    ? `<div class="bc-banner"><img src="${escHtml(c.thumbnail_url)}" alt="${escHtml(c.name)}" loading="lazy"></div>`
+    : `<div class="bc-banner bc-banner-empty"><i class="fa-solid fa-flag"></i></div>`;
+
+  const fishTags = fish
+    ? c.target_fish.slice(0,3).map(f=>`<span class="bc-tag fish">${escHtml(f)}</span>`).join('') +
+      (c.target_fish.length > 3 ? `<span class="bc-tag">+${c.target_fish.length-3}</span>` : '')
+    : `<span class="bc-tag">All fish</span>`;
 
   return `
-    <div class="browse-card">
+    <div class="bc">
       ${bannerHTML}
-      <div class="browse-card-header">
-        <div class="browse-card-name">${escHtml(c.name)}</div>
-        <div class="browse-card-host"><img src="${escHtml(c.owner_avatar||'')}" alt="" onerror="this.style.display='none'">Hosted by ${escHtml(c.owner_name)}</div>
-        <div class="browse-card-badges">
+      <div class="bc-body">
+        <div class="bc-top">
+          <div class="bc-name">${escHtml(c.name)}</div>
           <span class="comp-status-badge active">Active</span>
-          ${c.join_approval==='manual'?'<span class="browse-tag" style="margin-top:4px"><i class="fa-solid fa-lock" style="margin-right:3px"></i>Approval</span>':''}
         </div>
-      </div>
-      <div class="browse-card-body">
-        <div class="browse-card-desc">${c.description?escHtml(c.description):'<span style="opacity:.4">No description.</span>'}</div>
-        <div class="browse-card-tags">
-          ${isTeam?'<span class="browse-tag team"><i class="fa-solid fa-users" style="margin-right:3px"></i>Team</span>':'<span class="browse-tag"><i class="fa-solid fa-user" style="margin-right:3px"></i>Solo</span>'}
-          <span class="browse-tag"><i class="fa-solid fa-${c.scoring==='weight'?'weight-scale':c.scoring==='count'?'fish':'dollar-sign'}" style="margin-right:3px"></i>${scoringLabel}</span>
-          ${fish ? c.target_fish.slice(0,4).map(f=>`<span class="browse-tag fish">${escHtml(f)}</span>`).join('')+(c.target_fish.length>4?`<span class="browse-tag">+${c.target_fish.length-4} more</span>`:'') : '<span class="browse-tag">All fish</span>'}
+        <div class="bc-host">
+          <img src="${escHtml(c.owner_avatar||'')}" alt="" onerror="this.style.display='none'">
+          Hosted by <strong>${escHtml(c.owner_name)}</strong>
         </div>
-      </div>
-      <div class="browse-card-footer">
-        ${c.discord_invite?`<a href="${escHtml(c.discord_invite)}" target="_blank" rel="noopener" class="browse-discord-link"><i class="fa-brands fa-discord"></i>Discord</a>`:'<span></span>'}
-        ${joinBtn}
+        <div class="bc-desc">${c.description ? escHtml(c.description) : '<em style="opacity:.4">No description.</em>'}</div>
+        <div class="bc-tags">
+          <span class="bc-tag ${isTeam?'team':''}"><i class="fa-solid fa-${isTeam?'users':'user'}"></i>${isTeam?'Team':'Solo'}</span>
+          <span class="bc-tag"><i class="fa-solid fa-${scoringIcon}"></i>${scoringLabel}</span>
+          ${c.join_approval==='manual'?'<span class="bc-tag lock"><i class="fa-solid fa-lock"></i>Approval</span>':''}
+          ${fishTags}
+        </div>
+        <div class="bc-footer">
+          ${c.discord_invite
+            ? `<a href="${escHtml(c.discord_invite)}" target="_blank" rel="noopener" class="bc-discord"><i class="fa-brands fa-discord"></i>Discord</a>`
+            : `<span></span>`}
+          ${joinBtn}
+        </div>
       </div>
     </div>`;
 }
