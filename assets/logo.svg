@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 48" fill="none">
+  <!-- Fish icon -->
+  <g transform="translate(4,8)">
+    <!-- Body -->
+    <ellipse cx="18" cy="16" rx="14" ry="9" fill="#c9963a"/>
+    <!-- Tail -->
+    <polygon points="4,16 -4,8 -4,24" fill="#c9963a"/>
+    <!-- Eye -->
+    <circle cx="24" cy="14" r="2.5" fill="#0e1f18"/>
+    <circle cx="24.8" cy="13.2" r="0.8" fill="#f6f3ee"/>
+    <!-- Fin -->
+    <path d="M14,7 Q18,2 22,7" stroke="#a07a2a" stroke-width="1.5" fill="none"/>
+    <!-- Scales hint -->
+    <path d="M12,12 Q15,10 18,12" stroke="#a07a2a" stroke-width="1" fill="none" opacity="0.6"/>
+    <path d="M16,15 Q19,13 22,15" stroke="#a07a2a" stroke-width="1" fill="none" opacity="0.6"/>
+  </g>
+  <!-- Text: Fish -->
+  <text x="44" y="29" font-family="Lora, Georgia, serif" font-weight="700" font-size="22" fill="#f6f3ee" letter-spacing="-0.5">Fish</text>
+  <!-- Text: Book -->
+  <text x="96" y="29" font-family="Lora, Georgia, serif" font-weight="700" font-size="22" fill="#c9963a" letter-spacing="-0.5">Book</text>
+</svg>
