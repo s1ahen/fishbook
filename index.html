@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FishBook — West Coast Florida Community Logbook</title>
   <meta name="description" content="FishBook: A third-party community catch-tracking logbook for the West Coast Florida Roblox fishing game. Not affiliated with Roblox.">
-
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -17,35 +16,39 @@
 
   <div id="toast"></div>
 
-  <!-- ─── Login ─────────────────────────────────────────────── -->
+  <!-- Catch Modal -->
+  <div class="modal-overlay" id="catch-modal-overlay">
+    <div class="catch-modal" id="catch-modal"></div>
+  </div>
+
+  <!-- ─── Login ───────────────────────────────────────────────── -->
   <div id="page-login" class="page">
     <div class="login-left">
       <img class="login-logo" src="assets/logo.svg" alt="FishBook">
       <h1 class="login-tagline">Track every haul.<br><em>Own the waters.</em></h1>
-      <p class="login-sub">The community catch logbook for West Coast Florida anglers. Log your biggest catches, climb the leaderboard, and see what everyone else is reeling in.</p>
+      <p class="login-sub">The community catch logbook for West Coast Florida anglers. Log your biggest catches, climb the leaderboard, and host your own fishing tournaments.</p>
       <ul class="login-features">
         <li><i class="fa-solid fa-fish"></i> Log catches with weight and auto-calculated value</li>
         <li><i class="fa-solid fa-camera"></i> Upload catch photos</li>
         <li><i class="fa-solid fa-trophy"></i> Live community leaderboard</li>
-        <li><i class="fa-solid fa-chart-bar"></i> Personal stats and catch history</li>
+        <li><i class="fa-solid fa-flag"></i> Host & join fishing competitions</li>
       </ul>
       <div class="login-disclaimer">
         <strong>Third-party fan tool — not affiliated with Roblox.</strong>
-        FishBook is an unofficial community project and is not affiliated with, endorsed by, or connected to Roblox Corporation or the developers of West Coast Florida. All game names and values are property of their respective owners.
+        FishBook is an unofficial community project and is not affiliated with, endorsed by, or connected to Roblox Corporation or the developers of West Coast Florida.
       </div>
     </div>
     <div class="login-right">
       <h2>Welcome aboard</h2>
-      <p>Sign in with Discord to start logging your catches and join the community leaderboard.</p>
+      <p>Sign in with Discord to start logging catches and join the community leaderboard.</p>
       <button id="btn-discord-login" class="btn-discord">
-        <i class="fa-brands fa-discord"></i>
-        Continue with Discord
+        <i class="fa-brands fa-discord"></i> Continue with Discord
       </button>
       <div id="login-error"></div>
     </div>
   </div>
 
-  <!-- ─── Topbar ─────────────────────────────────────────────── -->
+  <!-- ─── Topbar ──────────────────────────────────────────────── -->
   <header id="topbar" style="display:none">
     <div class="topbar-logo">
       <img src="assets/logo.svg" alt="FishBook">
@@ -53,6 +56,7 @@
     <nav>
       <a href="#" data-page="feed"><i class="fa-solid fa-house"></i> <span>Feed</span></a>
       <a href="#" data-page="leaderboard"><i class="fa-solid fa-trophy"></i> <span>Leaderboard</span></a>
+      <a href="#" data-page="competitions"><i class="fa-solid fa-flag"></i> <span>Competitions</span></a>
     </nav>
     <div class="topbar-right">
       <span class="fan-badge">Fan Tool &bull; Not affiliated with Roblox</span>
@@ -60,18 +64,18 @@
     </div>
   </header>
 
-  <!-- ─── App ────────────────────────────────────────────────── -->
+  <!-- ─── App ─────────────────────────────────────────────────── -->
   <main id="app" style="display:none">
 
     <!-- Feed -->
     <div id="page-feed" class="page">
       <div class="feed-hero">
         <h1>Community <span>Feed</span></h1>
-        <p>Latest catches from anglers across the server.</p>
+        <p>Latest catches from anglers across the server. Tap any card for details.</p>
       </div>
       <div class="feed-body">
-        <div id="catches-stream" class="catches-stream">
-          <div class="loading-spinner"><div class="spinner"></div> Loading…</div>
+        <div id="catches-grid" class="catches-grid">
+          <div class="loading-spinner"><div class="spinner"></div></div>
         </div>
       </div>
     </div>
@@ -79,7 +83,7 @@
     <!-- Leaderboard -->
     <div id="page-leaderboard" class="page">
       <div class="lb-page-wrap">
-        <h1><i class="fa-solid fa-trophy" style="color:var(--brass);font-size:26px;margin-right:12px"></i>Leaderboard</h1>
+        <h1><i class="fa-solid fa-trophy" style="color:var(--brass);font-size:24px;margin-right:12px"></i>Leaderboard</h1>
         <p class="lb-sub">Top anglers ranked by total catch value.</p>
         <div class="podium-wrap" id="lb-podium">
           <div class="loading-spinner"><div class="spinner"></div></div>
@@ -102,6 +106,71 @@
       </div>
     </div>
 
+    <!-- Competitions -->
+    <div id="page-competitions" class="page">
+      <div class="comps-page-wrap">
+        <h1><i class="fa-solid fa-flag" style="color:var(--brass);font-size:24px;margin-right:12px"></i>Competitions</h1>
+        <p class="comps-sub">Host your own fishing tournament or join one with a 6-digit code.</p>
+
+        <div class="comps-layout">
+          <!-- Left: list of comps -->
+          <div>
+            <div id="comp-list" class="comp-cards">
+              <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
+            <div id="comp-detail-wrap" style="margin-top:0"></div>
+          </div>
+
+          <!-- Right: create + join panels -->
+          <div>
+            <!-- Create -->
+            <div class="comp-panel" style="margin-bottom:16px">
+              <div class="comp-panel-header">
+                <h3><i class="fa-solid fa-plus-circle"></i> Create Competition</h3>
+              </div>
+              <div class="comp-panel-body">
+                <div class="form-group" style="margin-bottom:12px">
+                  <label>Competition Name</label>
+                  <input type="text" id="comp-name-input" placeholder="e.g. Friday Night Fishing">
+                </div>
+                <div class="form-group" style="margin-bottom:12px">
+                  <label>Description (optional)</label>
+                  <textarea id="comp-desc-input" placeholder="Rules, prizes, anything goes…"></textarea>
+                </div>
+                <div class="form-group">
+                  <label>Scoring Method</label>
+                  <select id="comp-scoring-select">
+                    <option value="value">Highest Total Value ($)</option>
+                    <option value="weight">Heaviest Total Weight</option>
+                    <option value="count">Most Catches</option>
+                  </select>
+                </div>
+                <button class="btn-brass" id="btn-create-comp" onclick="createCompetition()">
+                  <i class="fa-solid fa-flag"></i> Create Competition
+                </button>
+              </div>
+            </div>
+
+            <!-- Join -->
+            <div class="comp-panel">
+              <div class="comp-panel-header">
+                <h3><i class="fa-solid fa-door-open"></i> Join a Competition</h3>
+              </div>
+              <div class="comp-panel-body">
+                <div class="form-group" style="margin-bottom:4px">
+                  <label>Enter 6-digit Code</label>
+                  <div class="join-input-row">
+                    <input type="text" id="join-code-input" placeholder="ABC123" maxlength="6" style="text-transform:uppercase;letter-spacing:.1em;font-family:monospace;font-size:16px">
+                    <button class="btn-join" onclick="joinCompetition()">Join</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Log a Catch -->
     <div id="page-log" class="page">
       <div class="log-page-wrap">
@@ -111,9 +180,7 @@
           <div class="form-row">
             <div class="form-group">
               <label for="fish-type-select"><i class="fa-solid fa-fish"></i> Fish Type</label>
-              <select id="fish-type-select">
-                <option value="">— Select fish —</option>
-              </select>
+              <select id="fish-type-select"><option value="">— Select fish —</option></select>
             </div>
             <div class="form-group">
               <label for="weight-input"><i class="fa-solid fa-weight-scale"></i> Weight (lbs)</label>
@@ -134,6 +201,8 @@
               <input type="file" id="photo-input" accept="image/*">
             </div>
           </div>
+          <!-- Competition tags injected here -->
+          <div id="comp-tags-wrap" style="margin-top:4px"></div>
           <button class="btn-submit" id="submit-btn" onclick="submitCatch()">
             <i class="fa-solid fa-anchor"></i> Log Catch
           </button>
