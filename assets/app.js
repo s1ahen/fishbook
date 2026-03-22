@@ -210,12 +210,13 @@ async function loadFeed() {
 }
 
 function catchCardHTML(c) {
-  const rarity=getRarity(c.price_per_lb);
-  const value=c.estimated_value??(c.weight_lbs*c.price_per_lb);
-  const badge=rarity!=='common'?`<div class="rarity-badge ${rarity}">${rarity==='legendary'?'Legendary':'Rare'}</div>`:'';
-  const photo=c.photo_url
-    ?`<img src="${escHtml(c.photo_url)}" alt="${escHtml(c.fish_type)}" loading="lazy">`
-    :`<i class="fa-solid fa-fish no-photo"></i>`;
+  const rarity = getRarity(c.price_per_lb);
+  const value  = c.estimated_value ?? (c.weight_lbs * c.price_per_lb);
+  const badge  = rarity !== 'common'
+    ? `<div class="rarity-badge ${rarity}">${rarity==='legendary'?'Legendary':'Rare'}</div>` : '';
+  const photo  = c.photo_url
+    ? `<img src="${escHtml(c.photo_url)}" alt="${escHtml(c.fish_type)}" loading="lazy">`
+    : `<i class="fa-solid fa-fish no-photo"></i>`;
   return `
     <div class="catch-card ${rarity}" onclick='openCatchModal(${JSON.stringify(c)})'>
       <div class="catch-photo">${photo}${badge}</div>
@@ -223,9 +224,13 @@ function catchCardHTML(c) {
         <div class="catch-card-fish">${escHtml(c.fish_type)}</div>
         <div class="catch-card-meta">
           <div class="catch-card-weight"><i class="fa-solid fa-weight-scale"></i>${c.weight_lbs} lbs</div>
-          <div style="color:var(--brass-lt);font-weight:700;font-family:'Playfair Display',serif">${fmtMoney(value)}</div>
+          <div class="catch-card-value">${fmtMoney(value)}</div>
         </div>
-        <div class="catch-card-hint"><i class="fa-solid fa-arrow-up-right-from-square"></i> Tap for details</div>
+        <div class="catch-card-user">
+          <img src="${escHtml(c.avatar||'')}" alt="" onerror="this.style.display='none'">
+          ${escHtml(c.username)} &bull; ${timeAgo(c.caught_at)}
+        </div>
+        <div class="catch-card-hint"><i class="fa-solid fa-expand"></i> Tap for details</div>
       </div>
     </div>`;
 }
