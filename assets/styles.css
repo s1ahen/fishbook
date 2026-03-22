@@ -265,36 +265,37 @@ h1,h2,h3,h4{font-family:'Playfair Display',serif}
 .btn-submit{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-top:24px;padding:14px;background:var(--brass);color:var(--ink);border:none;border-radius:var(--r);font-size:15px;font-weight:700;letter-spacing:.02em;transition:all .2s}
 .btn-submit:hover{background:var(--brass-lt);transform:translateY(-1px);box-shadow:0 6px 20px rgba(200,149,46,.3)}.btn-submit:disabled{opacity:.55;cursor:not-allowed;transform:none}
 
-/* Toggle switch — fixed */
+/* Toggle switch — rebuilt without label overflow issues */
 .toggle-row{
   display:flex; align-items:center; justify-content:space-between;
-  padding:10px 0; border-bottom:1px solid rgba(255,255,255,.06);
-  gap:12px;
+  padding:11px 0; border-bottom:1px solid rgba(255,255,255,.06); gap:16px;
 }
-.toggle-row:last-child{border-bottom:none}
-.toggle-label{ font-size:13px; color:var(--foam); line-height:1.4; flex:1; }
+.toggle-row:last-child{ border-bottom:none; padding-bottom:0; }
+.toggle-label{ font-size:13px; color:var(--foam); line-height:1.4; flex:1; pointer-events:none; }
 .toggle-label small{ display:block; font-size:11px; color:var(--mist); margin-top:2px; }
-.toggle-switch{
-  position:relative; width:40px; height:22px; flex-shrink:0;
-  display:inline-block;
+
+/* The toggle is just a styled checkbox — no label wrapper */
+.toggle-check{
+  appearance:none; -webkit-appearance:none;
+  width:40px; height:22px; border-radius:999px; flex-shrink:0;
+  background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18);
+  cursor:pointer; transition:background .2s, border-color .2s;
+  position:relative; outline:none;
 }
-.toggle-switch input{
-  opacity:0; width:0; height:0;
-  position:absolute; top:0; left:0;
-}
-.toggle-slider{
-  position:absolute; inset:0; border-radius:999px;
-  background:rgba(255,255,255,.12); cursor:pointer; transition:background .2s;
-  border:1px solid rgba(255,255,255,.15);
-}
-.toggle-slider::before{
+.toggle-check::before{
   content:''; position:absolute;
   width:16px; height:16px; border-radius:50%;
-  background:#fff; left:2px; top:2px; transition:transform .2s;
+  background:#fff; top:2px; left:2px;
+  transition:transform .2s;
   pointer-events:none;
 }
-.toggle-switch input:checked + .toggle-slider{ background:var(--brass); border-color:var(--brass); }
-.toggle-switch input:checked + .toggle-slider::before{ transform:translateX(18px); }
+.toggle-check:checked{
+  background:var(--brass); border-color:var(--brass);
+}
+.toggle-check:checked::before{
+  transform:translateX(18px);
+}
+.toggle-check:hover{ border-color:rgba(200,149,46,.5); }
 
 /* Comp type tabs */
 .comp-type-tabs{ display:flex; gap:8px; }
