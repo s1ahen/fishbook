@@ -286,7 +286,7 @@
                       Players can create their own teams
                       <small>Anyone who joins can form a new team</small>
                     </div>
-                    <label class="toggle-switch">
+                    <label class="toggle-switch" onclick="event.stopPropagation()">
                       <input type="checkbox" id="toggle-allow-team-create">
                       <span class="toggle-slider"></span>
                     </label>
@@ -295,26 +295,25 @@
 
                 <!-- Target fish -->
                 <div class="form-group" style="margin-bottom:14px">
-                  <label style="display:flex;align-items:center;justify-content:space-between">
+                  <label style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
                     Target Fish
-                    <button class="fish-select-all" onclick="toggleAllFish()">Select all</button>
+                    <button type="button" class="fish-select-all" onclick="toggleAllFish()">Select all</button>
                   </label>
                   <div class="fish-multi-wrap" id="fish-multi-wrap"></div>
-                  <div style="font-size:11px;color:var(--mist);margin-top:5px">
-                    <i class="fa-solid fa-circle-info" style="margin-right:3px"></i>
-                    Leave all unselected to allow all fish.
+                  <div style="font-size:11px;color:var(--mist);margin-top:6px">
+                    <i class="fa-solid fa-circle-info" style="margin-right:3px"></i>Leave all unselected to allow all fish.
                   </div>
                 </div>
 
                 <!-- Settings toggles -->
                 <div class="form-group" style="margin-bottom:14px">
-                  <label>Settings</label>
+                  <label style="margin-bottom:4px">Settings</label>
                   <div class="toggle-row">
                     <div class="toggle-label">
                       Make tournament public
                       <small>Appears in the Browse Tournaments tab</small>
                     </div>
-                    <label class="toggle-switch">
+                    <label class="toggle-switch" onclick="event.stopPropagation()">
                       <input type="checkbox" id="toggle-is-public">
                       <span class="toggle-slider"></span>
                     </label>
@@ -324,7 +323,7 @@
                       Manual join approval
                       <small>You approve or deny each join request</small>
                     </div>
-                    <label class="toggle-switch">
+                    <label class="toggle-switch" onclick="event.stopPropagation()">
                       <input type="checkbox" id="toggle-manual-approval">
                       <span class="toggle-slider"></span>
                     </label>
