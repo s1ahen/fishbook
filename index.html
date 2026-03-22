@@ -322,9 +322,20 @@
                 </div>
 
                 <!-- Discord invite -->
-                <div class="form-group" style="margin-bottom:16px">
+                <div class="form-group" style="margin-bottom:12px">
                   <label><i class="fa-brands fa-discord" style="margin-right:4px"></i>Discord Invite Link (optional)</label>
                   <input type="text" id="comp-discord-input" placeholder="https://discord.gg/yourserver">
+                </div>
+
+                <!-- Thumbnail -->
+                <div class="form-group" style="margin-bottom:16px">
+                  <label><i class="fa-solid fa-image" style="margin-right:4px"></i>Tournament Banner (optional)</label>
+                  <label class="photo-upload-label" for="comp-thumbnail-input">
+                    <i class="fa-solid fa-camera"></i>
+                    <span id="comp-thumbnail-label-text">Upload a banner image</span>
+                  </label>
+                  <input type="file" id="comp-thumbnail-input" accept="image/*" style="display:none"
+                    onchange="document.getElementById('comp-thumbnail-label-text').textContent = this.files[0]?.name || 'Upload a banner image'">
                 </div>
 
                 <button class="btn-brass" id="btn-create-comp" onclick="createCompetition()">

@@ -419,12 +419,23 @@ function setCompType(type) {
 
 function initFishChips() {
   const wrap = document.getElementById('fish-multi-wrap');
-  if (!wrap || wrap.dataset.init) return;
-  wrap.dataset.init = '1';
+  if (!wrap) return;
+  _selectedFish.clear();
   wrap.innerHTML = FISH_PRICES.map(f => {
     const r = getRarity(f.price);
-    return `<div class="fish-chip ${r!=='common'?r:''}" data-fish="${escHtml(f.name)}" onclick="toggleFishChip(this,'${escHtml(f.name)}')">${escHtml(f.name)}</div>`;
+    const cls = r !== 'common' ? r : '';
+    return `<div class="fish-chip ${cls}" data-fish="${escHtml(f.name)}">${escHtml(f.name)}</div>`;
   }).join('');
+  // Remove any existing listener before adding a new one
+  wrap.onclick = null;
+  wrap.onclick = (e) => {
+    const chip = e.target.closest('.fish-chip');
+    if (!chip) return;
+    const name = chip.dataset.fish;
+    chip.classList.toggle('selected');
+    if (chip.classList.contains('selected')) _selectedFish.add(name);
+    else _selectedFish.delete(name);
+  };
 }
 
 function toggleFishChip(el, name) {
@@ -449,7 +460,8 @@ function genCode() { return Math.random().toString(36).substring(2,8).toUpperCas
 
 /* ─── Competitions — Load My Comps ───────────────────────────── */
 async function loadCompetitions() {
-  initFishChips();
+  // Init fish chips after a tick so the DOM is definitely rendered
+  setTimeout(initFishChips, 0);
   const list = document.getElementById('comp-list');
   list.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
   if (!currentUser) { list.innerHTML = '<div class="empty-state"><i class="fa-solid fa-lock"></i><p>Log in to see your competitions.</p></div>'; return; }
@@ -714,14 +726,26 @@ async function createCompetition() {
   const allowTC  = document.getElementById('toggle-allow-team-create')?.checked||false;
   const teamsRaw = document.getElementById('comp-teams-input')?.value||'';
   const premadeTeams = teamsRaw.split(',').map(s=>s.trim()).filter(Boolean);
+  const thumbInput = document.getElementById('comp-thumbnail-input');
   if (!name) { showToast('Please enter a competition name.','error'); return; }
   const btn = document.getElementById('btn-create-comp');
-  btn.disabled=true; btn.textContent='Creating…';
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Creating…';
   try {
     const code = genCode();
+
+    // Upload thumbnail if provided
+    let thumbnailUrl = null;
+    if (thumbInput?.files?.length > 0) {
+      const file = thumbInput.files[0];
+      const key  = `comp-banners/${currentUser.id}/${Date.now()}.${file.name.split('.').pop()}`;
+      const up   = await supaFetch(`/storage/v1/object/catch-photos/${key}`, {method:'POST', headers:{'Content-Type':file.type}, body:file});
+      if (up.ok) thumbnailUrl = `${CFG.SUPABASE_URL}/storage/v1/object/public/catch-photos/${key}`;
+    }
+
     const [comp] = await db('competitions', {method:'POST', body:JSON.stringify({
       code, name, description:desc||null,
       owner_id:currentUser.id, owner_name:currentUser.username, owner_avatar:currentUser.avatar,
+      thumbnail_url: thumbnailUrl,
       scoring, status:'active', comp_type:_compType, allow_team_create:allowTC,
       target_fish:[..._selectedFish], is_public:isPublic,
       join_approval: manual ? 'manual' : 'auto', discord_invite:discord,
@@ -730,10 +754,13 @@ async function createCompetition() {
     for (const tName of premadeTeams) {
       try { await db('competition_teams', {method:'POST', body:JSON.stringify({competition_id:comp.id, name:tName, created_by:currentUser.id})}); } catch(_){}
     }
+    // Reset form
     document.getElementById('comp-name-input').value='';
     document.getElementById('comp-desc-input').value='';
     document.getElementById('comp-discord-input').value='';
     document.getElementById('comp-teams-input').value='';
+    if (thumbInput) thumbInput.value='';
+    document.getElementById('comp-thumbnail-label-text').textContent='Upload a banner image';
     _selectedFish.clear();
     document.querySelectorAll('.fish-chip').forEach(c=>c.classList.remove('selected'));
     setCompType('solo');
@@ -803,8 +830,14 @@ function browseCardHTML(c, myStatus) {
   if (myStatus === 'approved') joinBtn = `<button class="btn-browse-join joined" disabled><i class="fa-solid fa-check"></i> Joined</button>`;
   else if (myStatus === 'pending') joinBtn = `<button class="btn-browse-join pending" disabled><i class="fa-solid fa-clock"></i> Pending</button>`;
   else joinBtn = `<button class="btn-browse-join" onclick="browseJoin('${escHtml(c.id)}','${escHtml(c.name)}','${escHtml(c.join_approval)}',this)"><i class="fa-solid fa-door-open"></i> ${c.join_approval==='manual'?'Request to Join':'Join'}</button>`;
+
+  const bannerHTML = c.thumbnail_url
+    ? `<div class="browse-card-banner"><img src="${escHtml(c.thumbnail_url)}" alt="${escHtml(c.name)}"></div>`
+    : `<div class="browse-card-banner browse-card-banner-empty"><i class="fa-solid fa-flag"></i></div>`;
+
   return `
     <div class="browse-card">
+      ${bannerHTML}
       <div class="browse-card-header">
         <div class="browse-card-name">${escHtml(c.name)}</div>
         <div class="browse-card-host"><img src="${escHtml(c.owner_avatar||'')}" alt="" onerror="this.style.display='none'">Hosted by ${escHtml(c.owner_name)}</div>
@@ -818,7 +851,7 @@ function browseCardHTML(c, myStatus) {
         <div class="browse-card-tags">
           ${isTeam?'<span class="browse-tag team"><i class="fa-solid fa-users" style="margin-right:3px"></i>Team</span>':'<span class="browse-tag"><i class="fa-solid fa-user" style="margin-right:3px"></i>Solo</span>'}
           <span class="browse-tag"><i class="fa-solid fa-${c.scoring==='weight'?'weight-scale':c.scoring==='count'?'fish':'dollar-sign'}" style="margin-right:3px"></i>${scoringLabel}</span>
-          ${fish ? c.target_fish.slice(0,5).map(f=>`<span class="browse-tag fish">${escHtml(f)}</span>`).join('')+(c.target_fish.length>5?`<span class="browse-tag">+${c.target_fish.length-5} more</span>`:'') : '<span class="browse-tag">All fish</span>'}
+          ${fish ? c.target_fish.slice(0,4).map(f=>`<span class="browse-tag fish">${escHtml(f)}</span>`).join('')+(c.target_fish.length>4?`<span class="browse-tag">+${c.target_fish.length-4} more</span>`:'') : '<span class="browse-tag">All fish</span>'}
         </div>
       </div>
       <div class="browse-card-footer">
@@ -840,53 +873,6 @@ async function browseJoin(compId, compName, approval, btn) {
     if (e.message.includes('unique')) { btn.className='btn-browse-join joined'; btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-check"></i> Joined'; }
     else { showToast('Error: '+e.message,'error'); btn.disabled=false; btn.innerHTML='Join'; }
   }
-}
-
-async function loadCompetitions() {
-  const list=document.getElementById('comp-list');
-  list.innerHTML='<div class="loading-spinner"><div class="spinner"></div></div>';
-  if(!currentUser) return;
-  try {
-    const [owned,memberships]=await Promise.all([
-      db(`competitions?owner_id=eq.${encodeURIComponent(currentUser.id)}&select=*&order=created_at.desc`),
-      db(`competition_members?user_id=eq.${encodeURIComponent(currentUser.id)}&select=competition_id`),
-    ]);
-    let joined=[];
-    if(memberships.length){
-      const ids=memberships.map(m=>m.competition_id).join(',');
-      joined=await db(`competitions?id=in.(${ids})&owner_id=neq.${encodeURIComponent(currentUser.id)}&select=*&order=created_at.desc`);
-    }
-    const all=[...owned,...joined];
-    list.innerHTML=all.length
-      ? all.map(c=>compCardHTML(c)).join('')
-      : '<div class="empty-state"><i class="fa-solid fa-flag"></i><p>No competitions yet. Create or join one!</p></div>';
-  } catch(e){list.innerHTML=`<div class="empty-state"><p>${escHtml(e.message)}</p></div>`;}
-}
-
-function compCardHTML(c){
-  const isOwner=currentUser&&c.owner_id===currentUser.id;
-  return `
-    <div class="comp-card" onclick="viewComp('${escHtml(c.id)}')">
-      <div class="comp-card-top">
-        <div class="comp-card-name">${escHtml(c.name)}</div>
-        <span class="comp-status-badge ${c.status}">${c.status==='active'?'Active':'Ended'}</span>
-      </div>
-      ${c.description?`<div class="comp-card-desc">${escHtml(c.description)}</div>`:''}
-      <div class="comp-card-meta">
-        <span><i class="fa-solid fa-${c.scoring==='weight'?'weight-scale':c.scoring==='count'?'fish':'dollar-sign'}"></i>${c.scoring==='weight'?'By Weight':c.scoring==='count'?'By Count':'By Value'}</span>
-        ${isOwner?'<span><i class="fa-solid fa-crown"></i>Your comp</span>':''}
-        <span style="margin-left:auto"><span class="comp-code">${escHtml(c.code)}</span></span>
-      </div>
-    </div>`;
-}
-
-async function viewComp(id){
-  try {
-    const [comp]=await db(`competitions?id=eq.${encodeURIComponent(id)}&select=*`);
-    if(!comp) return;
-    activeComp=comp;
-    renderCompDetail(comp);
-  } catch(e){showToast('Error loading competition','error');}
 }
 
 /* ─── Profile ─────────────────────────────────────────────────── */
