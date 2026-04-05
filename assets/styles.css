@@ -646,4 +646,70 @@ h1,h2,h3,h4{font-family:'Playfair Display',serif}
   .podium-wrap{flex-direction:column;align-items:center}.podium-card{max-width:100%;width:100%;order:unset !important}
   #topbar nav a span{display:none}
 }
-@media(max-width:600px){.home-features-grid{grid-template-columns:1fr}.home-hero{padding:64px 0 48px}.home-hero h1{font-size:36px}.container{padding:0 16px}.form-row.triple{grid-template-columns:1fr}}
+
+@media(max-width:600px){.home-features-grid{grid-template-columns:1fr}.home-hero{padding:64px 0 48px}.home-hero h1{font-size:36px}.container{padding:0 16px}.form-row.triple{grid-template-columns:1fr}.charters-grid,.partners-grid{grid-template-columns:1fr}.support-link span{display:none}}
+.support-link{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(88,101,242,.18);border:1px solid rgba(88,101,242,.35);border-radius:20px;color:#a0aaff;font-size:12px;font-weight:600;text-decoration:none;transition:all .2s;white-space:nowrap}
+.support-link:hover{background:rgba(88,101,242,.3);color:#fff}
+.support-link i{font-size:13px}
+
+/* ─── Charters ────────────────────────────────────────────────── */
+.charters-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:4px}
+.charter-card{background:var(--navy-mid);border:1px solid rgba(200,149,46,.15);border-radius:12px;overflow:hidden;transition:all .2s}
+.charter-card:hover{border-color:rgba(200,149,46,.35);transform:translateY(-3px);box-shadow:var(--shadow)}
+.charter-banner{height:160px;background:var(--navy-lt);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.charter-banner img{width:100%;height:100%;object-fit:cover}
+.charter-placeholder-icon{font-size:48px;color:var(--ocean)}
+.charter-body{padding:18px}
+.charter-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--foam);margin-bottom:8px}
+.charter-owner{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--mist);margin-bottom:8px}
+.charter-owner img{width:20px;height:20px;border-radius:50%;object-fit:cover}
+.charter-waters{font-size:12px;color:var(--brass-lt);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.charter-desc{font-size:13px;color:var(--mist);line-height:1.55;margin-bottom:14px}
+.charter-footer{margin-top:14px}
+.btn-charter-contact{display:inline-flex;align-items:center;gap:7px;padding:9px 18px;background:var(--discord);color:#fff;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s}
+.btn-charter-contact:hover{background:#4752c4;transform:translateY(-1px)}
+
+.charter-apply-panel{background:var(--navy-mid);border:1px solid rgba(200,149,46,.2);border-radius:12px;overflow:hidden}
+.charter-apply-header{background:var(--navy-lt);padding:14px 20px;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--foam);display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.charter-apply-header i{color:var(--brass)}
+.charter-apply-body{padding:20px}
+.charter-apply-sub{font-size:13px;color:var(--mist);margin-bottom:16px}
+.charter-apply-notice{padding:14px 20px;border-radius:8px;font-size:14px;display:flex;align-items:center;gap:10px}
+.charter-apply-notice.pending{background:rgba(200,149,46,.1);border:1px solid rgba(200,149,46,.25);color:var(--brass-lt)}
+.charter-apply-notice.approved{background:rgba(92,184,92,.1);border:1px solid rgba(92,184,92,.25);color:#7cd87c}
+.charter-apply-notice.rejected{background:rgba(220,70,70,.1);border:1px solid rgba(220,70,70,.25);color:#e07070}
+
+/* ─── Partners ────────────────────────────────────────────────── */
+.partners-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;margin-top:4px}
+.partner-card{background:var(--navy-mid);border:1px solid rgba(200,149,46,.2);border-radius:12px;padding:28px 22px;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative;transition:all .2s}
+.partner-card:hover{border-color:rgba(200,149,46,.45);transform:translateY(-3px);box-shadow:var(--shadow)}
+.partner-badge-wrap{position:absolute;top:14px;right:14px}
+.partner-badge{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;background:rgba(200,149,46,.15);border:1px solid rgba(200,149,46,.3);border-radius:20px;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--brass-lt);text-transform:uppercase}
+.partner-badge i{font-size:9px}
+.partner-logo{width:80px;height:80px;border-radius:50%;border:3px solid rgba(200,149,46,.3);background:var(--navy-lt);display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--ocean);overflow:hidden;margin-bottom:14px}
+.partner-logo img{width:100%;height:100%;object-fit:cover}
+.partner-name{font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:var(--foam);margin-bottom:8px}
+.partner-desc{font-size:13px;color:var(--mist);line-height:1.55;margin-bottom:18px;flex:1}
+.btn-partner-discord{display:inline-flex;align-items:center;gap:7px;padding:9px 20px;background:var(--discord);color:#fff;border-radius:7px;font-size:13px;font-weight:600;text-decoration:none;transition:all .2s}
+.btn-partner-discord:hover{background:#4752c4}
+
+/* ─── Admin Panel ─────────────────────────────────────────────── */
+.admin-section{background:var(--navy-mid);border:1px solid rgba(200,149,46,.15);border-radius:12px;overflow:hidden}
+.admin-section-title{background:var(--navy-lt);padding:14px 20px;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--foam);display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.06)}
+.admin-section-title i{color:var(--brass)}
+.admin-charter-row{display:flex;align-items:flex-start;gap:14px;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.05)}
+.admin-charter-row:last-child{border-bottom:none}
+.acr-info{display:flex;align-items:flex-start;gap:12px;flex:1;min-width:0}
+.acr-logo{width:48px;height:48px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,.08)}
+.acr-logo-placeholder{width:48px;height:48px;border-radius:8px;background:var(--navy-lt);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:var(--mist);font-size:20px;flex-shrink:0}
+.acr-name{font-weight:600;font-size:15px;color:var(--foam);margin-bottom:3px}
+.acr-meta{font-size:12px;color:var(--mist);margin-bottom:4px}
+.acr-desc{font-size:12px;color:rgba(122,153,184,.7);line-height:1.5;margin-top:4px}
+.acr-actions{display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.admin-status-badge{padding:3px 8px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.admin-status-badge.pending{background:rgba(200,149,46,.15);color:var(--brass-lt)}
+.admin-status-badge.approved{background:rgba(92,184,92,.12);color:#7cd87c}
+.admin-status-badge.rejected{background:rgba(220,70,70,.12);color:#e07070}
+.admin-partner-form{padding:20px;border-bottom:1px solid rgba(255,255,255,.06)}
+.admin-partner-row{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.05)}
+.admin-partner-row:last-child{border-bottom:none}

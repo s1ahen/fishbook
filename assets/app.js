@@ -7,7 +7,11 @@ const CFG = (typeof window.FISHBOOK_CONFIG !== 'undefined') ? window.FISHBOOK_CO
   REDIRECT_URI: window.location.origin,
 };
 
-/* ─── Fish Data ───────────────────────────────────────────────── */
+/* ─── Admin ───────────────────────────────────────────────────── */
+const ADMIN_ID = '786262323517456404';
+const isAdmin = () => currentUser?.id === ADMIN_ID;
+
+
 const FISH_PRICES = [
   {name:'Lady Fish',price:18},{name:'Stingray',price:22},{name:'Sea Trout',price:23},
   {name:'Black Drum',price:27},{name:'Sheepshead',price:28},{name:'Blue Marlin',price:28},
@@ -117,6 +121,7 @@ function renderUserPill() {
         <button class="dropdown-item" onclick="navigateTo('log');closeDropdown()"><i class="fa-solid fa-plus"></i> Log a Catch</button>
         <button class="dropdown-item" onclick="navigateTo('competitions');closeDropdown()"><i class="fa-solid fa-flag"></i> My Competitions</button>
         <div class="dropdown-divider"></div>
+        ${isAdmin() ? `<button class="dropdown-item" onclick="navigateTo('admin');closeDropdown()"><i class="fa-solid fa-shield-halved"></i> Admin Panel</button><div class="dropdown-divider"></div>` : ''}
         <button class="dropdown-item danger" onclick="logout()"><i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out</button>
       </div>
     </div>`;
@@ -149,6 +154,9 @@ function navigateTo(page) {
   if(page==='log')          setupLogPage();
   if(page==='competitions') loadCompetitions();
   if(page==='browse')       loadBrowse();
+  if(page==='charters')     loadCharters();
+  if(page==='partners')     loadPartners();
+  if(page==='admin')        loadAdmin();
 }
 
 /* ─── Homepage ────────────────────────────────────────────────── */
@@ -931,7 +939,224 @@ async function loadProfile(userId){
   } catch(e){hero.innerHTML=`<div class="empty-state"><p>${escHtml(e.message)}</p></div>`;}
 }
 
-/* ─── Toast ───────────────────────────────────────────────────── */
+/* ─── Charters ────────────────────────────────────────────────── */
+async function loadCharters() {
+  const grid = document.getElementById('charters-grid');
+  const applyWrap = document.getElementById('charter-apply-wrap');
+  grid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+
+  try {
+    const charters = await db('charter_companies?status=eq.approved&select=*&order=created_at.desc');
+    grid.innerHTML = charters.length
+      ? charters.map(c => charterCardHTML(c)).join('')
+      : '<div class="empty-state" style="grid-column:1/-1"><i class="fa-solid fa-ship"></i><p>No charter companies yet. Be the first to apply!</p></div>';
+  } catch(e) {
+    grid.innerHTML = `<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i><p>${escHtml(e.message)}</p></div>`;
+  }
+
+  // Show apply form for logged-in non-admin users who haven't already applied
+  if (!currentUser) { applyWrap.innerHTML = ''; return; }
+  try {
+    const existing = await db(`charter_companies?owner_id=eq.${encodeURIComponent(currentUser.id)}&select=id,status`);
+    if (existing.length) {
+      const s = existing[0].status;
+      applyWrap.innerHTML = `<div class="charter-apply-notice ${s}"><i class="fa-solid fa-${s==='approved'?'check-circle':s==='pending'?'clock':'circle-xmark'}"></i> Your charter application is <strong>${s}</strong>.</div>`;
+    } else {
+      applyWrap.innerHTML = charterApplyFormHTML();
+    }
+  } catch(_) { applyWrap.innerHTML = charterApplyFormHTML(); }
+}
+
+function charterCardHTML(c) {
+  return `
+    <div class="charter-card">
+      <div class="charter-banner">
+        ${c.logo_url
+          ? `<img src="${escHtml(c.logo_url)}" alt="${escHtml(c.name)}" loading="lazy">`
+          : `<i class="fa-solid fa-ship charter-placeholder-icon"></i>`}
+      </div>
+      <div class="charter-body">
+        <div class="charter-name">${escHtml(c.name)}</div>
+        <div class="charter-owner"><img src="${escHtml(c.owner_avatar||'')}" alt="" onerror="this.style.display='none'"> ${escHtml(c.owner_name)}</div>
+        ${c.waters ? `<div class="charter-waters"><i class="fa-solid fa-water"></i> ${escHtml(c.waters)}</div>` : ''}
+        ${c.description ? `<div class="charter-desc">${escHtml(c.description)}</div>` : ''}
+        <div class="charter-footer">
+          <a href="${escHtml(c.discord_url)}" target="_blank" rel="noopener" class="btn-charter-contact">
+            <i class="fa-brands fa-discord"></i> Book via Discord
+          </a>
+        </div>
+      </div>
+    </div>`;
+}
+
+function charterApplyFormHTML() {
+  return `
+    <div class="charter-apply-panel">
+      <div class="charter-apply-header"><i class="fa-solid fa-ship"></i> Start a Charter Company</div>
+      <div class="charter-apply-body">
+        <p class="charter-apply-sub">Applications are reviewed by an admin before going live.</p>
+        <div class="form-row">
+          <div class="form-group"><label>Company Name</label><input type="text" id="ca-name" placeholder="e.g. Gulf Coast Charters"></div>
+          <div class="form-group"><label>Waters / Area</label><input type="text" id="ca-waters" placeholder="e.g. Tampa Bay, Gulf of Mexico"></div>
+        </div>
+        <div class="form-group"><label>About Your Company</label><textarea id="ca-desc" placeholder="What do you offer? Experience level, specialties, rates…" style="min-height:80px"></textarea></div>
+        <div class="form-row">
+          <div class="form-group"><label><i class="fa-brands fa-discord"></i> Discord Server Link</label><input type="text" id="ca-discord" placeholder="https://discord.gg/…"></div>
+          <div class="form-group"><label><i class="fa-solid fa-image"></i> Logo URL (optional)</label><input type="text" id="ca-logo" placeholder="https://…/logo.png"></div>
+        </div>
+        <button class="btn-brass" onclick="submitCharterApplication()"><i class="fa-solid fa-paper-plane"></i> Submit Application</button>
+      </div>
+    </div>`;
+}
+
+async function submitCharterApplication() {
+  if (!currentUser) { showToast('Log in first.', 'error'); return; }
+  const name    = document.getElementById('ca-name')?.value?.trim();
+  const waters  = document.getElementById('ca-waters')?.value?.trim();
+  const desc    = document.getElementById('ca-desc')?.value?.trim();
+  const discord = document.getElementById('ca-discord')?.value?.trim();
+  const logo    = document.getElementById('ca-logo')?.value?.trim() || null;
+  if (!name)    { showToast('Enter a company name.', 'error'); return; }
+  if (!discord) { showToast('Enter your Discord server link.', 'error'); return; }
+  try {
+    await db('charter_companies', {method:'POST', body:JSON.stringify({
+      owner_id: currentUser.id, owner_name: currentUser.username, owner_avatar: currentUser.avatar,
+      name, waters: waters||null, description: desc||null, discord_url: discord,
+      logo_url: logo, status: 'pending',
+    })});
+    showToast('Application submitted! You\'ll be notified once reviewed.', 'success');
+    document.getElementById('charter-apply-wrap').innerHTML =
+      `<div class="charter-apply-notice pending"><i class="fa-solid fa-clock"></i> Your charter application is <strong>pending</strong> review.</div>`;
+  } catch(e) {
+    if (e.message.includes('unique')) showToast('You already have an application.', 'error');
+    else showToast('Error: '+e.message, 'error');
+  }
+}
+
+/* ─── Partners ────────────────────────────────────────────────── */
+async function loadPartners() {
+  const grid = document.getElementById('partners-grid');
+  grid.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+  try {
+    const partners = await db('partners?select=*&order=created_at.asc');
+    grid.innerHTML = partners.length
+      ? partners.map(p => partnerCardHTML(p)).join('')
+      : '<div class="empty-state" style="grid-column:1/-1"><i class="fa-solid fa-handshake"></i><p>No official partners yet.</p></div>';
+  } catch(e) {
+    grid.innerHTML = `<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i><p>${escHtml(e.message)}</p></div>`;
+  }
+}
+
+function partnerCardHTML(p) {
+  return `
+    <div class="partner-card">
+      <div class="partner-badge-wrap"><span class="partner-badge"><i class="fa-solid fa-star"></i> Official Partner</span></div>
+      <div class="partner-logo">
+        ${p.logo_url
+          ? `<img src="${escHtml(p.logo_url)}" alt="${escHtml(p.name)}">`
+          : `<i class="fa-solid fa-handshake"></i>`}
+      </div>
+      <div class="partner-name">${escHtml(p.name)}</div>
+      ${p.description ? `<div class="partner-desc">${escHtml(p.description)}</div>` : ''}
+      <a href="${escHtml(p.discord_url)}" target="_blank" rel="noopener" class="btn-partner-discord">
+        <i class="fa-brands fa-discord"></i> Join Server
+      </a>
+    </div>`;
+}
+
+/* ─── Admin ────────────────────────────────────────────────────── */
+async function loadAdmin() {
+  if (!isAdmin()) {
+    document.getElementById('page-admin').innerHTML = '<div class="container page-wrap"><div class="empty-state"><i class="fa-solid fa-lock"></i><p>Access denied.</p></div></div>';
+    return;
+  }
+  loadAdminCharters();
+  loadAdminPartners();
+}
+
+async function loadAdminCharters() {
+  const el = document.getElementById('admin-charter-list');
+  el.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+  try {
+    const apps = await db('charter_companies?select=*&order=created_at.desc');
+    el.innerHTML = apps.length
+      ? apps.map(a => `
+        <div class="admin-charter-row" id="acr-${escHtml(a.id)}">
+          <div class="acr-info">
+            ${a.logo_url ? `<img src="${escHtml(a.logo_url)}" alt="" class="acr-logo">` : '<div class="acr-logo-placeholder"><i class="fa-solid fa-ship"></i></div>'}
+            <div>
+              <div class="acr-name">${escHtml(a.name)}</div>
+              <div class="acr-meta">${escHtml(a.owner_name)} &bull; ${escHtml(a.waters||'—')} &bull; <a href="${escHtml(a.discord_url)}" target="_blank" rel="noopener" style="color:var(--brass-lt)">Discord</a></div>
+              ${a.description ? `<div class="acr-desc">${escHtml(a.description)}</div>` : ''}
+            </div>
+          </div>
+          <div class="acr-actions">
+            <span class="admin-status-badge ${a.status}">${a.status}</span>
+            ${a.status==='pending' ? `
+              <button class="btn-approve" onclick="adminCharterDecision('${escHtml(a.id)}','approved')"><i class="fa-solid fa-check"></i> Approve</button>
+              <button class="btn-deny"    onclick="adminCharterDecision('${escHtml(a.id)}','rejected')"><i class="fa-solid fa-xmark"></i> Reject</button>` : ''}
+            ${a.status==='approved' ? `<button class="btn-deny" onclick="adminCharterDecision('${escHtml(a.id)}','rejected')"><i class="fa-solid fa-ban"></i> Remove</button>` : ''}
+          </div>
+        </div>`).join('')
+      : '<div class="empty-state" style="padding:24px"><i class="fa-solid fa-inbox"></i><p>No charter applications yet.</p></div>';
+  } catch(e) { el.innerHTML = `<div class="empty-state"><p>${escHtml(e.message)}</p></div>`; }
+}
+
+async function adminCharterDecision(id, status) {
+  try {
+    await supaFetch(`/rest/v1/charter_companies?id=eq.${encodeURIComponent(id)}`, {method:'PATCH', body:JSON.stringify({status})});
+    showToast(status==='approved' ? 'Charter approved!' : 'Charter removed.', status==='approved'?'success':'error');
+    loadAdminCharters();
+  } catch(e) { showToast('Error: '+e.message, 'error'); }
+}
+
+async function loadAdminPartners() {
+  const el = document.getElementById('admin-partner-list');
+  el.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+  try {
+    const partners = await db('partners?select=*&order=created_at.asc');
+    el.innerHTML = partners.length
+      ? partners.map(p => `
+        <div class="admin-partner-row">
+          ${p.logo_url ? `<img src="${escHtml(p.logo_url)}" alt="" class="acr-logo">` : '<div class="acr-logo-placeholder"><i class="fa-solid fa-handshake"></i></div>'}
+          <div style="flex:1">
+            <div class="acr-name">${escHtml(p.name)}</div>
+            <div class="acr-meta">${escHtml(p.description||'—')}</div>
+          </div>
+          <button class="btn-deny" onclick="adminDeletePartner('${escHtml(p.id)}')"><i class="fa-solid fa-trash"></i></button>
+        </div>`).join('')
+      : '<div style="color:var(--mist);font-size:13px;padding:12px 0">No partners yet.</div>';
+  } catch(e) { el.innerHTML = `<div class="empty-state"><p>${escHtml(e.message)}</p></div>`; }
+}
+
+async function adminAddPartner() {
+  if (!isAdmin()) return;
+  const name    = document.getElementById('admin-partner-name')?.value?.trim();
+  const desc    = document.getElementById('admin-partner-desc')?.value?.trim();
+  const discord = document.getElementById('admin-partner-discord')?.value?.trim();
+  const logo    = document.getElementById('admin-partner-logo')?.value?.trim() || null;
+  if (!name)    { showToast('Enter a partner name.', 'error'); return; }
+  if (!discord) { showToast('Enter a Discord invite URL.', 'error'); return; }
+  try {
+    await db('partners', {method:'POST', body:JSON.stringify({name, description:desc||null, discord_url:discord, logo_url:logo})});
+    showToast('Partner added!', 'success');
+    document.getElementById('admin-partner-name').value='';
+    document.getElementById('admin-partner-desc').value='';
+    document.getElementById('admin-partner-discord').value='';
+    document.getElementById('admin-partner-logo').value='';
+    loadAdminPartners();
+  } catch(e) { showToast('Error: '+e.message, 'error'); }
+}
+
+async function adminDeletePartner(id) {
+  try {
+    await supaFetch(`/rest/v1/partners?id=eq.${encodeURIComponent(id)}`, {method:'DELETE'});
+    showToast('Partner removed.', 'success');
+    loadAdminPartners();
+  } catch(e) { showToast('Error: '+e.message, 'error'); }
+}
+
+
 function showToast(msg,type='success'){
   const t=document.getElementById('toast');
   t.textContent=msg; t.className='show '+type;
