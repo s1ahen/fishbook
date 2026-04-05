@@ -16,6 +16,12 @@
 
   <div id="toast"></div>
 
+  <!-- Floating Support Button -->
+  <a href="https://discord.gg/2Vn6JpJE" target="_blank" rel="noopener" class="support-fab" title="Join Support Server">
+    <i class="fa-brands fa-discord"></i>
+    <span>Support</span>
+  </a>
+
   <!-- Catch Modal -->
   <div class="modal-overlay" id="catch-modal-overlay">
     <div class="catch-modal" id="catch-modal"></div>
@@ -59,13 +65,11 @@
         <a href="#" data-page="feed"><i class="fa-solid fa-rss"></i> <span>Feed</span></a>
         <a href="#" data-page="leaderboard"><i class="fa-solid fa-trophy"></i> <span>Leaderboard</span></a>
         <a href="#" data-page="browse"><i class="fa-solid fa-binoculars"></i> <span>Browse</span></a>
-        <a href="#" data-page="competitions"><i class="fa-solid fa-flag"></i> <span>My Comps</span></a>
         <a href="#" data-page="charters"><i class="fa-solid fa-ship"></i> <span>Charters</span></a>
         <a href="#" data-page="partners"><i class="fa-solid fa-handshake"></i> <span>Partners</span></a>
       </nav>
       <div class="topbar-right">
-        <a href="https://discord.gg/2Vn6JpJE" target="_blank" rel="noopener" class="support-link"><i class="fa-brands fa-discord"></i> Support</a>
-        <span class="fan-badge">Fan Tool &bull; Not affiliated with Roblox</span>
+        <span class="fan-badge">Fan Tool · Not affiliated with Roblox</span>
         <div id="user-pill-wrap"></div>
       </div>
     </div>
@@ -106,6 +110,37 @@
         </div>
       </div>
 
+      <!-- Home Podium -->
+      <div class="home-podium-section">
+        <div class="container">
+          <div class="home-section-header">
+            <h2>Top <span>Anglers</span></h2>
+          </div>
+          <div class="podium-wrap" id="home-podium">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+          </div>
+          <div style="text-align:center;margin-top:24px">
+            <button class="btn-secondary" onclick="navigateTo('leaderboard')">
+              <i class="fa-solid fa-trophy"></i> Full Leaderboard
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Home Partners -->
+      <div class="home-partners-section">
+        <div class="container">
+          <div class="home-section-header">
+            <h2>Official <span>Partners</span></h2>
+            <button class="btn-text" onclick="navigateTo('partners')">View all <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+          <div id="home-partners-grid" class="partners-grid">
+            <div class="loading-spinner"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Built for the community -->
       <div class="home-features">
         <div class="container">
           <div style="text-align:center">
@@ -135,27 +170,15 @@
               <p>Browse everyone's recent catches in a photo-first grid. Tap any card to see full details and stats.</p>
             </div>
             <div class="feat-card">
-              <div class="feat-icon"><i class="fa-solid fa-binoculars"></i></div>
-              <h3>Browse Tournaments</h3>
-              <p>Discover and join publicly listed tournaments from other anglers in the community.</p>
+              <div class="feat-icon"><i class="fa-solid fa-ship"></i></div>
+              <h3>Charter Companies</h3>
+              <p>Find and book local charter captains for guided fishing trips. Contact them directly via Discord.</p>
             </div>
             <div class="feat-card">
               <div class="feat-icon"><i class="fa-brands fa-discord"></i></div>
               <h3>Discord Login</h3>
               <p>Sign in with your Discord account. No new accounts, no passwords — just one click to get started.</p>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="home-feed-section">
-        <div class="container">
-          <div class="home-section-header">
-            <h2>Recent <span>Catches</span></h2>
-            <button class="btn-text" onclick="navigateTo('feed')">View all <i class="fa-solid fa-arrow-right"></i></button>
-          </div>
-          <div id="home-catches-grid" class="catches-grid">
-            <div class="loading-spinner"><div class="spinner"></div></div>
           </div>
           <div class="home-disclaimer" style="margin-top:48px;margin-bottom:0">
             <i class="fa-solid fa-circle-info"></i>

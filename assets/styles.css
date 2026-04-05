@@ -31,7 +31,7 @@ h1,h2,h3,h4{font-family:'Playfair Display',serif}
 #topbar nav a.active{color:var(--brass-lt);background:rgba(200,149,46,.12)}
 #topbar nav a i{font-size:12px}
 .topbar-right{margin-left:auto;display:flex;align-items:center;gap:10px}
-.fan-badge{font-size:10px;color:var(--mist);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:3px 9px;border-radius:999px}
+.fan-badge{font-size:10px;color:var(--mist);background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);padding:3px 9px;border-radius:999px;white-space:nowrap}
 
 /* User Pill */
 .user-pill-wrap{position:relative}
@@ -647,10 +647,26 @@ h1,h2,h3,h4{font-family:'Playfair Display',serif}
   #topbar nav a span{display:none}
 }
 
-@media(max-width:600px){.home-features-grid{grid-template-columns:1fr}.home-hero{padding:64px 0 48px}.home-hero h1{font-size:36px}.container{padding:0 16px}.form-row.triple{grid-template-columns:1fr}.charters-grid,.partners-grid{grid-template-columns:1fr}.support-link span{display:none}}
-.support-link{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(88,101,242,.18);border:1px solid rgba(88,101,242,.35);border-radius:20px;color:#a0aaff;font-size:12px;font-weight:600;text-decoration:none;transition:all .2s;white-space:nowrap}
-.support-link:hover{background:rgba(88,101,242,.3);color:#fff}
-.support-link i{font-size:13px}
+@media(max-width:600px){.home-features-grid{grid-template-columns:1fr}.home-hero{padding:64px 0 48px}.home-hero h1{font-size:36px}.container{padding:0 16px}.form-row.triple{grid-template-columns:1fr}.charters-grid,.partners-grid{grid-template-columns:1fr}.home-partners-grid{grid-template-columns:repeat(2,1fr)}.support-fab span{display:none}.support-fab{padding:11px 14px}}
+/* ─── Support FAB ─────────────────────────────────────────────── */
+.support-fab{position:fixed;bottom:24px;right:24px;z-index:900;display:inline-flex;align-items:center;gap:8px;padding:11px 18px;background:#5865F2;color:#fff;border-radius:28px;font-size:13px;font-weight:700;text-decoration:none;box-shadow:0 4px 20px rgba(88,101,242,.45);transition:all .2s}
+.support-fab:hover{background:#4752c4;transform:translateY(-2px);box-shadow:0 6px 24px rgba(88,101,242,.55)}
+.support-fab i{font-size:15px}
+
+/* ─── Home Podium Section ─────────────────────────────────────── */
+.home-podium-section{padding:64px 0 48px;background:var(--navy)}
+.home-podium-section .podium-wrap{margin-top:28px}
+
+/* ─── Home Partners Section ───────────────────────────────────── */
+.home-partners-section{padding:56px 0 48px;background:linear-gradient(180deg,var(--navy) 0%,var(--navy-mid) 100%)}
+.home-partners-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-top:24px}
+.home-partner-card{display:flex;flex-direction:column;align-items:center;text-align:center;padding:22px 16px;gap:10px;background:var(--navy-lt);border:1px solid rgba(200,149,46,.18);border-radius:12px;text-decoration:none;color:inherit;transition:all .2s}
+.home-partner-card:hover{border-color:rgba(200,149,46,.45);transform:translateY(-3px);box-shadow:var(--shadow)}
+.home-partner-logo{width:56px;height:56px;border-radius:50%;border:2px solid rgba(200,149,46,.25);background:var(--navy);display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--ocean);overflow:hidden}
+.home-partner-logo img{width:100%;height:100%;object-fit:cover}
+.home-partner-name{font-family:'Playfair Display',serif;font-size:14px;font-weight:700;color:var(--foam)}
+.home-partner-badge{font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--brass-lt);display:flex;align-items:center;gap:4px}
+.home-partner-badge i{font-size:9px}
 
 /* ─── Charters ────────────────────────────────────────────────── */
 .charters-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;margin-top:4px}
@@ -713,3 +729,7 @@ h1,h2,h3,h4{font-family:'Playfair Display',serif}
 .admin-partner-form{padding:20px;border-bottom:1px solid rgba(255,255,255,.06)}
 .admin-partner-row{display:flex;align-items:center;gap:12px;padding:12px 20px;border-bottom:1px solid rgba(255,255,255,.05)}
 .admin-partner-row:last-child{border-bottom:none}
+
+/* ─── Home Podium & Partners Sections ────────────────────────── */
+.home-podium-section{padding:64px 0 52px;background:var(--navy)}
+.home-partners-section{padding:52px 0;background:var(--navy-mid)}

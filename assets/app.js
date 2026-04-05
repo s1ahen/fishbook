@@ -175,17 +175,32 @@ async function loadHome() {
     animateNum('stat-value',   Math.round(totalValue), v=>fmtMoney(v));
   } catch(_){}
 
-  // Recent catches preview (8)
-  const grid=document.getElementById('home-catches-grid');
-  if(!grid) return;
-  grid.innerHTML='<div class="loading-spinner"><div class="spinner"></div></div>';
-  try {
-    const catches=await db('catches?select=*&order=caught_at.desc&limit=8');
-    grid.innerHTML=catches.length
-      ? catches.map(c=>catchCardHTML(c)).join('')
-      : '<div class="empty-state"><i class="fa-solid fa-water"></i><p>No catches yet. Be the first!</p></div>';
-  } catch(e){
-    grid.innerHTML=`<div class="empty-state"><i class="fa-solid fa-circle-exclamation"></i><p>${escHtml(e.message)}</p></div>`;
+  // Home podium — top 3
+  const podiumEl = document.getElementById('home-podium');
+  if (podiumEl) {
+    try {
+      const rows = await db('leaderboard_summary?select=*&order=total_value.desc&limit=3');
+      if (!rows.length) {
+        podiumEl.innerHTML = '<div class="empty-state"><i class="fa-solid fa-trophy"></i><p>No anglers yet — be the first!</p></div>';
+      } else {
+        const top3 = rows.slice(0,3);
+        const positions = top3.length >= 3
+          ? [{data:top3[1],rank:2,cls:'second'},{data:top3[0],rank:1,cls:'first'},{data:top3[2],rank:3,cls:'third'}]
+          : top3.map((d,i)=>({data:d,rank:i+1,cls:['first','second','third'][i]}));
+        podiumEl.innerHTML = positions.map(p=>podiumCardHTML(p.data,p.rank,p.cls)).join('');
+      }
+    } catch(_) { podiumEl.innerHTML = ''; }
+  }
+
+  // Home partners preview
+  const partnersEl = document.getElementById('home-partners-grid');
+  if (partnersEl) {
+    try {
+      const partners = await db('partners?select=*&order=created_at.asc&limit=4');
+      partnersEl.innerHTML = partners.length
+        ? partners.map(p => partnerCardHTML(p)).join('')
+        : '<div class="empty-state" style="grid-column:1/-1"><i class="fa-solid fa-handshake"></i><p>No partners yet.</p></div>';
+    } catch(_) { partnersEl.innerHTML = ''; }
   }
 }
 
